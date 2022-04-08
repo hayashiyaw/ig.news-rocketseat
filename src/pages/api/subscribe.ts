@@ -1,7 +1,7 @@
 /* eslint-disable import/no-anonymous-default-export */
 import { NextApiRequest, NextApiResponse } from "next";
 import { query as q } from 'faunadb';
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 import { fauna } from "../../services/fauna";
 import { stripe } from '../../services/stripe';
 
@@ -14,11 +14,11 @@ type User = {
   }
 }
 
-
-
 export default async(req: NextApiRequest, res: NextApiResponse) => {
   if(req.method === 'POST'){
     const session = await getSession({ req })
+
+    console.log(session.user)
 
     const user = await fauna.query<User>(
       q.Get(
@@ -28,8 +28,6 @@ export default async(req: NextApiRequest, res: NextApiResponse) => {
         )
       )
     )
-
-    console.log(session)
 
     let customerId = user.data.stripe_customer_id;
 
