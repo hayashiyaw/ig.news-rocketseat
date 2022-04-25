@@ -15,27 +15,24 @@ export default NextAuth({
       type: "oauth",
       authorization:
         "https://github.com/login/oauth/authorize?scope=read:user+user:email",
-      token: "https://github.com/login/oauth/access_token",
     }),
   ],
 
   callbacks: {
-    async signIn(user) {
+    async signIn(data) {
 
-      console.log(user);
-
-      const { email } = user;
+      const { email } = data.user;
 
       try {
         await fauna.query(
           q.If(
             q.Not(
               q.Exists(
-                q.Match(q.Index("user_by_email"), q.Casefold(user.email))
+                q.Match(q.Index("user_by_email"), q.Casefold(email))
               )
             ),
-            q.Create(q.Collection("users"), { data: { email } }),
-            q.Get(q.Match(q.Index("user_by_email"), q.Casefold(user.email)))
+            q.Create(q.Collection("users"), { data: data.user }),
+            q.Get(q.Match(q.Index("user_by_email"), q.Casefold(email)))
           )
         );
 

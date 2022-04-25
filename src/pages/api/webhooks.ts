@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import { NextApiRequest, NextApiResponse } from "next";
 import { Readable } from "stream";
 import Stripe from "stripe";
@@ -28,6 +29,8 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
 
     let event: Stripe.Event;
 
+    console.log(event)
+
     try {
       event = stripe.webhooks.constructEvent(
         buf,
@@ -35,13 +38,15 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
         process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
+      console.log(err)
       return res.status(400).send(`Webhook error: ${err.message}`);
     }
 
-    const type = event.type;
+    const { type } = event;
+    console.log(type)
 
     if (relevantEvents.has(type)) {
-      console.log("Evento recebido", event);
+      console.log('Evento Recebido: ',  event)
     }
 
     res.json({ received: true });
